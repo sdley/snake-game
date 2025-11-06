@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Classic Snake — HTML5 Canvas</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="wrap">
+      <header>
+        <h1>Classic Snake</h1>
+        <p class="tag">A small, dependency-free HTML5 Canvas implementation</p>
+      </header>
+
+      <section class="game-area">
+        <canvas
+          id="game"
+          width="600"
+          height="600"
+          aria-label="Snake game canvas"
+        ></canvas>
+        <div class="hud">
+          <div>Score: <span id="score">0</span></div>
+          <div>High: <span id="high">0</span></div>
+        </div>
+      </section>
+
+      <section class="controls">
+        <button id="start">Start</button>
+        <button id="pause">Pause</button>
+        <button id="restart">Restart</button>
+        <label class="toggle"
+          ><input type="checkbox" id="wrap" checked /> Wrap edges</label
+        >
+        <label class="speed"
+          >Speed:
+          <input
+            id="speed"
+            type="range"
+            min="40"
+            max="300"
+            value="110"
+            step="10"
+          />
+          <span id="speedVal">110</span> ms</label
+        >
+        <div class="help">
+          Controls: Arrow keys / WASD. Can't reverse direction instantly.
+        </div>
+      </section>
+
+      <footer>
+        <small>Built for learning — MIT licensed.</small>
+      </footer>
+    </main>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

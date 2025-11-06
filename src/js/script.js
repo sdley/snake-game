@@ -10,6 +10,7 @@
   const wrapCheckbox = document.getElementById("wrap");
   const speedRange = document.getElementById("speed");
   const speedLabel = document.getElementById("speedVal");
+  const obstaclesToggle = document.getElementById("obstacles");
 
   const COLS = 30; // grid columns
   const ROWS = 30; // grid rows
@@ -24,6 +25,8 @@
   let score = 0;
   let high = Number(localStorage.getItem("snake-high") || 0);
   let running = false;
+  let obstacles = [];
+  let obstacleCount = 12; // default number of single-cell obstacles
 
   highEl.textContent = high;
   if (speedLabel) speedLabel.textContent = String(tickInterval);
@@ -43,7 +46,10 @@
     while (true) {
       const x = Math.floor(Math.random() * COLS);
       const y = Math.floor(Math.random() * ROWS);
-      if (!snake.some((s) => s.x === x && s.y === y)) {
+      if (
+        !snake.some((s) => s.x === x && s.y === y) &&
+        !obstacles.some((o) => o.x === x && o.y === y)
+      ) {
         food = { x, y };
         return;
       }
@@ -59,6 +65,9 @@
     running = false;
     scoreEl.textContent = score;
     highEl.textContent = high;
+    // place obstacles first (if enabled), then food
+    if (obstaclesToggle && obstaclesToggle.checked) placeObstacles();
+    else obstacles = [];
     placeFood();
     draw();
     stopTimer();
@@ -115,6 +124,14 @@
     if (snake.some((s) => s.x === head.x && s.y === head.y)) return gameOver();
 
     snake.unshift(head);
+
+    // obstacle collision (check after adding head to keep behaviour consistent)
+    if (obstaclesToggle && obstaclesToggle.checked) {
+      if (obstacles.some((o) => o.x === head.x && o.y === head.y)) {
+        console.debug("Obstacle hit at", head);
+        return gameOver();
+      }
+    }
 
     // eat food
     if (food && head.x === food.x && head.y === food.y) {
@@ -182,6 +199,14 @@
       );
     }
 
+    // obstacles
+    if (obstacles && obstacles.length) {
+      ctx.fillStyle = "#b45f06"; // obstacle color
+      for (const o of obstacles) {
+        roundRect(ctx, o.x * CELL + 3, o.y * CELL + 3, CELL - 6, CELL - 6, 4);
+      }
+    }
+
     // snake
     for (let i = 0; i < snake.length; i++) {
       const s = snake[i];
@@ -203,6 +228,29 @@
     ctx.arcTo(x, y, x + w, y, r);
     ctx.closePath();
     ctx.fill();
+  }
+
+  function placeObstacles() {
+    obstacles = [];
+    const maxCells = COLS * ROWS;
+    const maxObstacles = Math.min(
+      obstacleCount,
+      Math.max(0, maxCells - snake.length - 5)
+    );
+    const maxAttempts = 5000;
+    let attempts = 0;
+    while (obstacles.length < maxObstacles && attempts < maxAttempts) {
+      attempts++;
+      const x = Math.floor(Math.random() * COLS);
+      const y = Math.floor(Math.random() * ROWS);
+      if (
+        !snake.some((s) => s.x === x && s.y === y) &&
+        !(food && food.x === x && food.y === y) &&
+        !obstacles.some((o) => o.x === x && o.y === y)
+      ) {
+        obstacles.push({ x, y });
+      }
+    }
   }
 
   // input handling
@@ -231,9 +279,8 @@
     start();
   });
 
-  // start small
-  placeFood();
-  draw();
+  // initialize game state (place obstacles when enabled, then food)
+  reset();
 
   // expose for debugging in console
   window.Snake = { reset, start, pause };

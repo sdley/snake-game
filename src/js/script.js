@@ -42,6 +42,22 @@
     });
   }
 
+  // react to changes in the Obstacles toggle immediately
+  if (obstaclesToggle) {
+    obstaclesToggle.addEventListener("change", (e) => {
+      if (e.target.checked) {
+        // enable obstacles: place them and ensure food isn't on an obstacle
+        placeObstacles();
+        if (food && obstacles.some((o) => o.x === food.x && o.y === food.y))
+          placeFood();
+      } else {
+        // disable obstacles: clear and redraw immediately
+        obstacles = [];
+      }
+      draw();
+    });
+  }
+
   function placeFood() {
     while (true) {
       const x = Math.floor(Math.random() * COLS);
